@@ -12,6 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Tables\Actions\DeleteAction;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -19,7 +22,7 @@ class AuthorResource extends Resource
 {
     protected static ?string $model = Author::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
     public static function form(Form $form): Form
     {
@@ -45,7 +48,18 @@ class AuthorResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+        ->before(function (Model $record, DeleteAction $action) {
+            if ($record->books()->exists()) {
+                Notification::make()
+                    ->title('Cannot Delete Author')
+                    ->body('This author is assigned to one or more books.')
+                    ->danger()
+                    ->send();
+
+                $action->halt();
+            }
+        }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

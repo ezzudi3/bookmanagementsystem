@@ -13,6 +13,10 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Notifications\Notification;
+
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -20,7 +24,7 @@ class BookResource extends Resource
 {
     protected static ?string $model = Book::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
     public static function form(Form $form): Form
     {
@@ -47,6 +51,18 @@ class BookResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+        ->before(function (Model $record, DeleteAction $action) {
+            if ($record->issuedBooks()->exists()) {
+                Notification::make()
+                    ->title('Cannot Delete Book')
+                    ->body('This book is currently issued and cannot be deleted.')
+                    ->danger()
+                    ->send();
+
+                $action->halt();
+            }
+        }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

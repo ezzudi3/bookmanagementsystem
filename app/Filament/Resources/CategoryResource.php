@@ -12,6 +12,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -19,7 +22,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
 
     public static function form(Form $form): Form
     {
@@ -41,6 +44,18 @@ class CategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make()
+        ->before(function (Model $record, DeleteAction $action) {
+            if ($record->books()->exists()) { 
+                Notification::make()
+                    ->title('Cannot Delete Category')
+                    ->body('This category is assigned to one or more books.')
+                    ->danger()
+                    ->send();
+
+                $action->halt();
+            }
+        }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

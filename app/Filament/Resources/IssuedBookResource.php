@@ -21,7 +21,7 @@ class IssuedBookResource extends Resource
 {
     protected static ?string $model = IssuedBook::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationLabel = 'Issued Books';
     protected static ?string $modelLabel = 'Issued Book';
 
@@ -71,6 +71,7 @@ class IssuedBookResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
