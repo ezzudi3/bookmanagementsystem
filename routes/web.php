@@ -12,8 +12,9 @@ Route::get('/register', [StudentController::class, 'showRegister'])->name('regis
 Route::post('/register', [StudentController::class, 'register']);
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return redirect('/student/dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -29,6 +30,5 @@ Route::middleware(['auth'])->prefix('student')->name('student.')->group(function
     Route::post('/profile', [StudentController::class, 'updateProfile'])->name('profile.update');
     Route::get('/issued-books', [StudentController::class, 'issuedBooks'])->name('issued');
 });
-require __DIR__.'/auth.php'; // auth routes
 
 require __DIR__.'/auth.php';
